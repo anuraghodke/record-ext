@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      width: 100%;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      overflow: hidden;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    
+    .header {
+      background: #fff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 16px 20px;
+      flex-shrink: 0;
+    }
+    
+    .title {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+      color: #333;
+    }
+    
+    .status {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+    
+    .recording {
+      color: #dc3545;
+      font-weight: 500;
+    }
+    
+    .controls {
+      background: #fff;
+      border-bottom: 1px solid #e9ecef;
+      padding: 16px 20px;
+      flex-shrink: 0;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      flex: 1;
+    }
+    
+    .btn-record {
+      background: #dc3545;
+      color: white;
+    }
+    
+    .btn-record:hover {
+      background: #c82333;
+    }
+    
+    .btn-record:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .btn-stop {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-stop:hover {
+      background: #5a6268;
+    }
+    
+    .btn-stop:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .btn-download {
+      background: #28a745;
+      color: white;
+      width: 100%;
+    }
+    
+    .btn-download:hover {
+      background: #218838;
+    }
+    
+    .btn-download:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .timeline-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #fff;
+    }
+    
+    .timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e9ecef;
+    }
+    
+    .timeline-item {
+      position: relative;
+      margin-bottom: 16px;
+      padding: 12px 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 3px solid #007bff;
+    }
+    
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -22px;
+      top: 20px;
+      width: 12px;
+      height: 12px;
+      background: #007bff;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+    
+    .timeline-item.click {
+      border-left-color: #28a745;
+    }
+    
+    .timeline-item.click::before {
+      background: #28a745;
+    }
+    
+    .timeline-item.type {
+      border-left-color: #ffc107;
+    }
+    
+    .timeline-item.type::before {
+      background: #ffc107;
+    }
+    
+    .timeline-item.press {
+      border-left-color: #17a2b8;
+    }
+    
+    .timeline-item.press::before {
+      background: #17a2b8;
+    }
+    
+    .timeline-item.navigate {
+      border-left-color: #6f42c1;
+    }
+    
+    .timeline-item.navigate::before {
+      background: #6f42c1;
+    }
+    
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .timeline-type {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #666;
+    }
+    
+    .timeline-time {
+      font-size: 12px;
+      color: #999;
+    }
+    
+    .timeline-content {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.4;
+    }
+    
+    .timeline-locators {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .locator {
+      background: #e9ecef;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-right: 8px;
+      margin-bottom: 4px;
+      display: inline-block;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #999;
+      padding: 40px 20px;
+    }
+    
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+    
+    .info {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.4;
+      text-align: center;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">Recorder Extension</div>
+      <div class="status" id="status">Ready to record</div>
+    </div>
+    
+    <div class="controls">
+      <div class="button-group">
+        <button class="btn btn-record" id="recordBtn">Record</button>
+        <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
+      </div>
+      <button class="btn btn-download" id="downloadBtn" disabled>Download Trace</button>
+    </div>
+    
+    <div class="timeline-container">
+      <div class="timeline" id="timeline">
+        <div class="empty-state">
+          <div class="empty-state-icon">📹</div>
+          <div>No actions recorded yet</div>
+          <div>Start recording to see your actions here</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="record.js"></script>
+</body>
+</html>

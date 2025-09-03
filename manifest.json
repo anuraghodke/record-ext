@@ -1,0 +1,26 @@
+{
+  "name": "Recorder",
+  "description": "Recorder Extension",
+  "version": "1.0",
+  "manifest_version": 3,
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "index.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["content.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_icon": "recorder-ext.png"
+  }
+}

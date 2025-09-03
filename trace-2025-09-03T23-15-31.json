@@ -1,0 +1,101 @@
+{
+  "version": 1,
+  "steps": [
+    {
+      "t": 0,
+      "type": "navigate",
+      "url": "https://chatgpt.com/"
+    },
+    {
+      "t": 1163,
+      "type": "click",
+      "target": {
+        "locators": [
+          {
+            "type": "css",
+            "selector": "p.placeholder"
+          },
+          {
+            "type": "xpath",
+            "path": "/div/div[1]/div/div[1]/p"
+          }
+        ]
+      }
+    },
+    {
+      "t": 6264,
+      "type": "type",
+      "text": "overview of space explorations"
+    },
+    {
+      "t": 7171,
+      "type": "press",
+      "key": "Enter"
+    },
+    {
+      "t": 7578,
+      "type": "navigate",
+      "url": "https://chatgpt.com/c/68b8cbbb-5fc0-8321-92f3-64c918253cee"
+    },
+    {
+      "t": 21813,
+      "type": "click",
+      "target": {
+        "locators": [
+          {
+            "type": "id",
+            "value": "radix-«R2aij4im4pact9a4mj5»"
+          },
+          {
+            "type": "css",
+            "selector": "#radix-«R2aij4im4pact9a4mj5»"
+          },
+          {
+            "type": "xpath",
+            "path": "//*[@id=\"radix-«R2aij4im4pact9a4mj5»\"]"
+          }
+        ]
+      }
+    },
+    {
+      "t": 24207,
+      "type": "click",
+      "target": {
+        "locators": [
+          {
+            "type": "text",
+            "content": "Web search"
+          },
+          {
+            "type": "css",
+            "selector": "div.truncate"
+          },
+          {
+            "type": "xpath",
+            "path": "/div/div[2]/div[1]/div[2]/div"
+          }
+        ]
+      }
+    },
+    {
+      "t": 28363,
+      "type": "type",
+      "text": "latest mars missions"
+    },
+    {
+      "t": 30038,
+      "type": "press",
+      "key": "Enter"
+    },
+    {
+      "t": 75493,
+      "type": "type",
+      "text": "current updates on the perseverance robot"
+    },
+    {
+      "t": 77208,
+      "type": "press",
+      "key": "Enter"
+    }
+  ]
+}
