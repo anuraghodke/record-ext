@@ -160,6 +160,21 @@
       }
     },
     
+    isDynamicId: function(id) {
+      const dynamicPatterns = [
+        /radix-«[^»]+»/,  // radix-«random»
+        /^[a-f0-9]{8,}$/,  // long hex strings
+        /^[a-zA-Z0-9]{20,}$/,  // long alphanumeric strings
+        /^[a-f0-9-]{20,}$/,  // UUID-like patterns
+        /^react-select/,  // React component IDs
+        /^mui-/,  // Material-UI IDs
+        /^chakra-/,  // Chakra UI IDs
+        /^rc-/,  // React component IDs
+      ];
+      
+      return dynamicPatterns.some(pattern => pattern.test(id));
+    },
+
     // Generate locators for elements
     generateLocators: function(element) {
       const locators = [];
@@ -177,8 +192,14 @@
         }
       }
       
-      // Try ID
-      if (element.id) {
+      if (element.getAttribute('data-testid')) {
+        locators.push({
+          type: 'data-testid',
+          value: element.getAttribute('data-testid')
+        });
+      }
+      
+      if (element.id && !this.isDynamicId(element.id)) {
         locators.push({
           type: 'id',
           value: element.id
@@ -224,7 +245,14 @@
         });
       }
       
-      // Try CSS selector with better specificity
+      // Special handling for composer plus button
+      if (this.isComposerPlusButton(element)) {
+        locators.push({
+          type: 'composer-plus',
+          description: 'Composer plus button'
+        });
+      }
+      
       try {
         const cssSelector = this.generateCSSSelector(element);
         if (cssSelector) {
@@ -254,21 +282,59 @@
       return locators;
     },
     
+    // Check if element is composer plus button
+    isComposerPlusButton: function(element) {
+      const dataTestId = element.getAttribute('data-testid');
+      const className = element.className;
+      const ariaLabel = element.getAttribute('aria-label');
+      
+      return dataTestId === 'composer-plus-btn' ||
+             className.includes('composer-btn') ||
+             ariaLabel?.toLowerCase().includes('plus') ||
+             ariaLabel?.toLowerCase().includes('add');
+    },
+    
+    // Web search button detection
     isWebSearchButton: function(element) {
       const text = element.textContent?.toLowerCase() || '';
       const ariaLabel = element.getAttribute('aria-label')?.toLowerCase() || '';
       const title = element.getAttribute('title')?.toLowerCase() || '';
+      const dataTestId = element.getAttribute('data-testid')?.toLowerCase() || '';
+      const role = element.getAttribute('role');
       
-      return text.includes('web search') || 
-             text.includes('search the web') ||
-             ariaLabel.includes('web search') ||
-             ariaLabel.includes('search the web') ||
-             title.includes('web search') ||
-             title.includes('search the web');
+      // Check for web search indicators
+      const isWebSearch = text.includes('web search') || 
+                         text.includes('search the web') ||
+                         ariaLabel.includes('web search') ||
+                         ariaLabel.includes('search the web') ||
+                         title.includes('web search') ||
+                         title.includes('search the web') ||
+                         dataTestId.includes('web-search') ||
+                         dataTestId.includes('search-web') ||
+                         (role === 'menuitemradio' && text.includes('web search'));
+      
+      // Additional check: look for specific ChatGPT web search patterns
+      if (isWebSearch) {
+        console.log('Web search button detected:', {
+          text: text,
+          ariaLabel: ariaLabel,
+          title: title,
+          dataTestId: dataTestId,
+          role: role,
+          element: element
+        });
+        return true;
+      }
+      
+      return false;
     },
     
     generateCSSSelector: function(element) {
-      if (element.id) {
+      if (element.getAttribute('data-testid')) {
+        return `[data-testid="${element.getAttribute('data-testid')}"]`;
+      }
+      
+      if (element.id && !this.isDynamicId(element.id)) {
         return `#${element.id}`;
       }
       
@@ -294,7 +360,11 @@
     },
     
     generateSimpleXPath: function(element) {
-      if (element.id) {
+      if (element.getAttribute('data-testid')) {
+        return `//*[@data-testid="${element.getAttribute('data-testid')}"]`;
+      }
+      
+      if (element.id && !this.isDynamicId(element.id)) {
         return `//*[@id="${element.id}"]`;
       }
       
@@ -344,6 +414,28 @@
             }
           }
           
+          // Handle composer plus button
+          if (locatorType === 'composer-plus') {
+            selector = this.findComposerPlusButton();
+            if (selector) {
+              console.log('Found composer plus button:', selector);
+              return selector;
+            }
+          }
+          
+          // Handle data-testid (most reliable)
+          if (locatorType === 'data-testid') {
+            const testId = locator.value;
+            if (testId) {
+              selector = `[data-testid="${testId}"]`;
+              if (document.querySelector(selector)) {
+                console.log('Found element by data-testid:', selector);
+                return selector;
+              }
+            }
+          }
+          
+          // Handle standard locators
           if (locatorType === 'role') {
             const role = locator.role;
             const name = locator.name;
@@ -439,8 +531,46 @@
       return null;
     },
     
+    findComposerPlusButton: function() {
+      console.log('Searching for composer plus button...');
+      
+      const testIdSelector = '[data-testid="composer-plus-btn"]';
+      const element = document.querySelector(testIdSelector);
+      if (element) {
+        console.log('Found composer plus button by data-testid:', element);
+        return element;
+      }
+      
+      const classSelector = 'button.composer-btn';
+      const classElement = document.querySelector(classSelector);
+      if (classElement) {
+        console.log('Found composer plus button by class:', classElement);
+        return classElement;
+      }
+      
+      const ariaSelector = 'button[aria-haspopup="menu"]';
+      const ariaElement = document.querySelector(ariaSelector);
+      if (ariaElement) {
+        console.log('Found composer plus button by aria-haspopup:', ariaElement);
+        return ariaElement;
+      }
+      
+      console.log('No composer plus button found');
+      return null;
+    },
+    
     findWebSearchButton: function() {
-      const searchSelectors = [
+      console.log('Searching for web search button...');
+      
+      const currentChatWebSearchToggle = this.findCurrentChatWebSearchToggle();
+      if (currentChatWebSearchToggle) {
+        console.log('Found current chat web search toggle:', currentChatWebSearchToggle);
+        return currentChatWebSearchToggle;
+      }
+      
+      const specificSelectors = [
+        'button[data-testid*="web-search"]',
+        'button[data-testid*="search-web"]',
         'button[aria-label*="Web search"]',
         'button[title*="Web search"]',
         'button[aria-label*="Search the web"]',
@@ -448,10 +578,12 @@
         'button[aria-label*="web search"]',
         'button[title*="web search"]',
         'button[aria-label*="search the web"]',
-        'button[title*="search the web"]'
+        'button[title*="search the web"]',
+        'button[data-testid="web-search-toggle"]',
+        'button[data-testid="search-toggle"]'
       ];
       
-      for (const selector of searchSelectors) {
+      for (const selector of specificSelectors) {
         const element = document.querySelector(selector);
         if (element) {
           console.log('Found web search button with selector:', selector, element);
@@ -459,22 +591,95 @@
         }
       }
       
-      // Fallback: look for buttons containing web search text
+      const menuItems = document.querySelectorAll('[role="menuitemradio"]');
+      for (const item of menuItems) {
+        const text = item.textContent?.toLowerCase() || '';
+        if (text.includes('web search')) {
+          console.log('Found web search menuitemradio:', item);
+          return item;
+        }
+      }
+      
       const buttons = document.querySelectorAll('button');
+      console.log(`Checking ${buttons.length} buttons for web search text...`);
       for (const button of buttons) {
         const text = button.textContent?.toLowerCase() || '';
         const ariaLabel = button.getAttribute('aria-label')?.toLowerCase() || '';
         const title = button.getAttribute('title')?.toLowerCase() || '';
+        const dataTestId = button.getAttribute('data-testid')?.toLowerCase() || '';
         
         if (text.includes('web search') || text.includes('search the web') ||
             ariaLabel.includes('web search') || ariaLabel.includes('search the web') ||
-            title.includes('web search') || title.includes('search the web')) {
-          console.log('Found web search button by text:', button);
+            title.includes('web search') || title.includes('search the web') ||
+            dataTestId.includes('web-search') || dataTestId.includes('search-web')) {
+          
+          console.log('Found web search button by text/attributes:', {
+            text: text,
+            ariaLabel: ariaLabel,
+            title: title,
+            dataTestId: dataTestId,
+            element: button
+          });
+          return button;
+        }
+      }
+      
+      const toggleButtons = document.querySelectorAll('button[data-testid*="toggle"], button[aria-label*="toggle"]');
+      for (const button of toggleButtons) {
+        const parent = button.closest('[class*="search"], [class*="web"], [class*="toggle"]');
+        if (parent) {
+          console.log('Found potential web search toggle button:', button);
           return button;
         }
       }
       
       console.log('No web search button found');
+      return null;
+    },
+    
+    findCurrentChatWebSearchToggle: function() {
+      console.log('Looking for current chat web search toggle...');
+      
+      const toggleSelectors = [
+        'button[data-testid*="web-search-toggle"]',
+        'button[data-testid*="search-toggle"]',
+        'button[aria-label*="Web search"]',
+        'button[title*="Web search"]',
+        'button[aria-label*="Search the web"]',
+        'button[title*="Search the web"]'
+      ];
+      
+      for (const selector of toggleSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            console.log('Found visible web search toggle:', element);
+            return element;
+          }
+        }
+      }
+      
+      const allButtons = document.querySelectorAll('button');
+      for (const button of allButtons) {
+        const text = button.textContent?.toLowerCase() || '';
+        const ariaLabel = button.getAttribute('aria-label')?.toLowerCase() || '';
+        const title = button.getAttribute('title')?.toLowerCase() || '';
+        const dataTestId = button.getAttribute('data-testid')?.toLowerCase() || '';
+        
+        // Check if it's a web search toggle
+        if ((text.includes('web search') || text.includes('search the web') ||
+             ariaLabel.includes('web search') || ariaLabel.includes('search the web') ||
+             title.includes('web search') || title.includes('search the web') ||
+             dataTestId.includes('web-search') || dataTestId.includes('search-web')) &&
+            button.offsetParent !== null) { // Check if visible
+          
+          console.log('Found visible web search toggle button:', button);
+          return button;
+        }
+      }
+      
+      console.log('No current chat web search toggle found');
       return null;
     },
     
@@ -485,6 +690,14 @@
         const element = typeof selector === 'string' ? document.querySelector(selector) : selector;
         if (element) {
           console.log('Clicking element:', element);
+          console.log('Element details:', {
+            tagName: element.tagName,
+            textContent: element.textContent,
+            ariaLabel: element.getAttribute('aria-label'),
+            title: element.getAttribute('title'),
+            dataTestId: element.getAttribute('data-testid'),
+            className: element.className
+          });
           
           // Try multiple click methods
           element.click();
