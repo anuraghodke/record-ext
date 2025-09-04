@@ -2,7 +2,7 @@
 
 Allows users to record and replay user flows. Records navigation, clicks and keystrokes and displays them in a vertical timeline in the side panel. User can then download the recorded trace as a JSON file.
 
-** Features **
+## Features
 
 - Side Panel Interface: Opens as a persistent side panel that stays open during recording
 - Trace: Clicks, typing, key presses, and page navigation
@@ -10,7 +10,7 @@ Allows users to record and replay user flows. Records navigation, clicks and key
 - Record: Start & stop recording the user's interactions on the current tab
 - Download: Export the recorded trace as a JSON file
 
-** Usage **
+## Usage
 
 1. Navigate to any webpage you want to record
 2. Click the Recorder extension icon to open the side panel

@@ -1,189 +1,229 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recorder Extension</title>
   <style>
-    body {
-      width: 100%;
-      height: 100vh;
+    * {
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f8f9fa;
-      overflow: hidden;
+      box-sizing: border-box;
     }
     
-    .container {
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8f9fa;
+      color: #333;
+      height: 100vh;
       display: flex;
       flex-direction: column;
-      height: 100vh;
     }
     
     .header {
       background: #fff;
-      border-bottom: 1px solid #e9ecef;
-      padding: 16px 20px;
-      flex-shrink: 0;
+      border-bottom: 1px solid #e1e5e9;
+      padding: 16px;
+      text-align: center;
     }
     
-    .title {
+    .header h1 {
       font-size: 18px;
       font-weight: 600;
-      margin: 0 0 8px 0;
-      color: #333;
-    }
-    
-    .status {
-      font-size: 14px;
-      color: #666;
-      margin: 0;
-    }
-    
-    .recording {
-      color: #dc3545;
-      font-weight: 500;
+      color: #2c3e50;
     }
     
     .controls {
       background: #fff;
-      border-bottom: 1px solid #e9ecef;
-      padding: 16px 20px;
-      flex-shrink: 0;
+      border-bottom: 1px solid #e1e5e9;
+      padding: 16px;
     }
     
     .button-group {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       margin-bottom: 12px;
     }
     
     .btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
       border-radius: 6px;
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.2s;
       flex: 1;
     }
     
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
     .btn-record {
-      background: #dc3545;
+      background: #e74c3c;
       color: white;
     }
     
-    .btn-record:hover {
-      background: #c82333;
-    }
-    
-    .btn-record:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
+    .btn-record:hover:not(:disabled) {
+      background: #c0392b;
     }
     
     .btn-stop {
-      background: #6c757d;
+      background: #95a5a6;
       color: white;
     }
     
-    .btn-stop:hover {
-      background: #5a6268;
-    }
-    
-    .btn-stop:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
+    .btn-stop:hover:not(:disabled) {
+      background: #7f8c8d;
     }
     
     .btn-download {
-      background: #28a745;
+      background: #3498db;
       color: white;
       width: 100%;
     }
     
-    .btn-download:hover {
-      background: #218838;
+    .btn-download:hover:not(:disabled) {
+      background: #2980b9;
     }
     
-    .btn-download:disabled {
-      background: #6c757d;
-      cursor: not-allowed;
+    .btn-play {
+      background: #27ae60;
+      color: white;
+      width: 100%;
+    }
+    
+    .btn-play:hover:not(:disabled) {
+      background: #229954;
+    }
+    
+    .btn-step {
+      background: #f39c12;
+      color: white;
+    }
+    
+    .btn-step:hover:not(:disabled) {
+      background: #e67e22;
+    }
+    
+    .btn-stop-replay {
+      background: #e74c3c;
+      color: white;
+    }
+    
+    .btn-stop-replay:hover:not(:disabled) {
+      background: #c0392b;
+    }
+    
+    .info {
+      font-size: 12px;
+      color: #7f8c8d;
+      text-align: center;
+      margin-top: 8px;
+    }
+    
+    .replay-section {
+      background: #fff;
+      border-bottom: 1px solid #e1e5e9;
+      padding: 16px;
+    }
+    
+    .file-input-group {
+      margin-bottom: 12px;
+    }
+    
+    .file-input-group input[type="file"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    
+    .replay-controls {
+      display: none;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .replay-progress {
+      display: none;
+      margin-top: 12px;
+    }
+    
+    .progress-bar-container {
+      background: #ecf0f1;
+      border-radius: 10px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    
+    .progress-bar {
+      background: #3498db;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-text {
+      font-size: 12px;
+      color: #7f8c8d;
+      text-align: center;
+    }
+    
+    .status {
+      background: #fff;
+      border-bottom: 1px solid #e1e5e9;
+      padding: 12px 16px;
+      font-size: 14px;
+      text-align: center;
+      color: #7f8c8d;
+    }
+    
+    .status.recording {
+      color: #e74c3c;
+      font-weight: 500;
+    }
+    
+    .status.replaying {
+      color: #27ae60;
+      font-weight: 500;
     }
     
     .timeline-container {
       flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
     
     .timeline {
-      position: relative;
-      padding-left: 30px;
-    }
-    
-    .timeline::before {
-      content: '';
-      position: absolute;
-      left: 15px;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #e9ecef;
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
     }
     
     .timeline-item {
-      position: relative;
-      margin-bottom: 16px;
-      padding: 12px 16px;
-      background: #f8f9fa;
+      background: #fff;
+      border: 1px solid #e1e5e9;
       border-radius: 8px;
-      border-left: 3px solid #007bff;
+      padding: 12px;
+      margin-bottom: 8px;
+      transition: all 0.2s;
     }
     
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -22px;
-      top: 20px;
-      width: 12px;
-      height: 12px;
-      background: #007bff;
-      border-radius: 50%;
-      border: 2px solid #fff;
+    .timeline-item:hover {
+      border-color: #3498db;
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.1);
     }
     
-    .timeline-item.click {
-      border-left-color: #28a745;
-    }
-    
-    .timeline-item.click::before {
-      background: #28a745;
-    }
-    
-    .timeline-item.type {
-      border-left-color: #ffc107;
-    }
-    
-    .timeline-item.type::before {
-      background: #ffc107;
-    }
-    
-    .timeline-item.press {
-      border-left-color: #17a2b8;
-    }
-    
-    .timeline-item.press::before {
-      background: #17a2b8;
-    }
-    
-    .timeline-item.navigate {
-      border-left-color: #6f42c1;
-    }
-    
-    .timeline-item.navigate::before {
-      background: #6f42c1;
+    .timeline-item.replaying {
+      border-color: #27ae60;
+      background: #f8fff8;
+      box-shadow: 0 2px 8px rgba(39, 174, 96, 0.2);
     }
     
     .timeline-header {
@@ -194,81 +234,114 @@
     }
     
     .timeline-type {
-      font-size: 12px;
       font-weight: 600;
-      text-transform: uppercase;
-      color: #666;
+      font-size: 14px;
     }
     
     .timeline-time {
       font-size: 12px;
-      color: #999;
+      color: #7f8c8d;
+      background: #f8f9fa;
+      padding: 2px 8px;
+      border-radius: 12px;
     }
     
     .timeline-content {
       font-size: 14px;
-      color: #333;
-      line-height: 1.4;
+      color: #2c3e50;
+      margin-bottom: 8px;
     }
     
     .timeline-locators {
-      margin-top: 8px;
-      font-size: 12px;
-      color: #666;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
     }
     
     .locator {
-      background: #e9ecef;
-      padding: 4px 8px;
+      background: #ecf0f1;
+      color: #7f8c8d;
+      font-size: 11px;
+      padding: 2px 6px;
       border-radius: 4px;
-      margin-right: 8px;
-      margin-bottom: 4px;
-      display: inline-block;
+      font-family: 'Monaco', 'Menlo', monospace;
     }
     
     .empty-state {
       text-align: center;
-      color: #999;
+      color: #7f8c8d;
       padding: 40px 20px;
     }
     
     .empty-state-icon {
       font-size: 48px;
       margin-bottom: 16px;
-      opacity: 0.5;
     }
     
-    .info {
-      font-size: 12px;
-      color: #888;
-      line-height: 1.4;
-      text-align: center;
-      margin-top: 8px;
+    .empty-state div:not(.empty-state-icon) {
+      margin-bottom: 8px;
+    }
+    
+    .timeline-item.navigate .timeline-type {
+      color: #3498db;
+    }
+    
+    .timeline-item.click .timeline-type {
+      color: #e74c3c;
+    }
+    
+    .timeline-item.type .timeline-type {
+      color: #f39c12;
+    }
+    
+    .timeline-item.press .timeline-type {
+      color: #9b59b6;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="title">Recorder Extension</div>
-      <div class="status" id="status">Ready to record</div>
+  <div class="header">
+    <h1>Recorder Extension</h1>
+  </div>
+  
+  <div class="controls">
+    <div class="button-group">
+      <button class="btn btn-record" id="recordBtn">Record</button>
+      <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
     </div>
-    
-    <div class="controls">
-      <div class="button-group">
-        <button class="btn btn-record" id="recordBtn">Record</button>
-        <button class="btn btn-stop" id="stopBtn" disabled>Stop</button>
+    <button class="btn btn-download" id="downloadBtn" disabled>Download Trace</button>
+    <div class="info">
+      Records clicks, typing, and navigation. Click Record to start capturing actions.
+    </div>
+  </div>
+  
+  <div class="replay-section">
+    <div class="file-input-group">
+      <input type="file" id="traceFileInput" accept=".json">
+    </div>
+    <button class="btn btn-play" id="playBtn" disabled>Play Trace</button>
+    <div class="replay-progress" id="replayProgress" style="display: none;">
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="progressBar"></div>
       </div>
-      <button class="btn btn-download" id="downloadBtn" disabled>Download Trace</button>
+      <div class="progress-text">
+        Step <span id="currentStep">0</span> of <span id="totalSteps">0</span>
+      </div>
     </div>
-    
-    <div class="timeline-container">
-      <div class="timeline" id="timeline">
-        <div class="empty-state">
-          <div class="empty-state-icon">📹</div>
-          <div>No actions recorded yet</div>
-          <div>Start recording to see your actions here</div>
-        </div>
+    <div class="replay-controls" id="replayControls" style="display: none;">
+      <button class="btn btn-step" id="stepBtn">Step</button>
+      <button class="btn btn-stop-replay" id="stopReplayBtn">Stop Replay</button>
+    </div>
+  </div>
+  
+  <div class="status" id="status">Ready to record</div>
+  
+  <div class="timeline-container">
+    <div class="timeline" id="timeline">
+      <div class="empty-state">
+        <div class="empty-state-icon">📹</div>
+        <div>No actions recorded yet</div>
+        <div>Start recording to see your actions here</div>
       </div>
     </div>
   </div>
