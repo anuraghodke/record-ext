@@ -32,4 +32,21 @@ Allows users to record and replay user flows. Records navigation, clicks and key
 - `content.js` - Injected script for capturing events
 - `background.js` - Background service worker for message handling and side panel control
 - `recorder-ext.png` - Custom drawn logo for the Chrome extension
-- `trace-2025-09-04T00-55-59` - Sample recorded action trace on https://chatgpt.com with a multiround conversation that uses the Web Search mode for two queries
+- `trace-2025-09-04T01-54-50` - Sample recorded action trace on https://chatgpt.com with a multiround conversation that uses the Web Search mode for two queries
+
+## Visual Documentation
+Home page:
+
+<img width="370" height="771" alt="Screenshot 2025-09-03 at 9 10 03 PM" src="https://github.com/user-attachments/assets/342847d9-cdc6-48cc-b903-fef981eec8cc" />
+
+Recording user flow:
+
+<img width="373" height="770" alt="Screenshot 2025-09-03 at 9 20 12 PM" src="https://github.com/user-attachments/assets/8f926b95-8ef6-4265-b9f4-d4ace017418f" />
+
+Replaying trace:
+
+<img width="1077" height="763" alt="Screenshot 2025-09-03 at 9 14 37 PM" src="https://github.com/user-attachments/assets/20aa0a4d-11da-473b-b2f7-79fdaef103f5" />
+
+Replaying query using ChatGPT Web Search mode:
+
+<img width="1075" height="765" alt="Screenshot 2025-09-03 at 9 16 06 PM" src="https://github.com/user-attachments/assets/476613e1-4048-42b3-a617-234b4f21a81d" />
